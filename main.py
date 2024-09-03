@@ -77,6 +77,9 @@ def tick():
     global pet_vel_x
     global pet_vel_y
     
+    global ticks_awake
+    global last_state
+
     global ticks
 
     mouse_x = root.winfo_pointerx()
