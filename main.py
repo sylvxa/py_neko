@@ -1,4 +1,3 @@
-import random
 from tkinter import *
 from PIL import ImageTk, Image
 
@@ -27,7 +26,8 @@ images = {
     "up": [load("assets/up1.png"), load("assets/up2.png")],
     "down": [load("assets/down1.png"), load("assets/down2.png")],
     "awake": load("assets/awake.png"),
-    "sleep": [load("assets/sleep1.png"), load("assets/sleep2.png")]
+    "sleep": [load("assets/sleep1.png"), load("assets/sleep2.png")],
+    "yawn": [load("assets/yawn1.png"), load("assets/yawn2.png")]
 }
 
 pet_x: float = 0
@@ -48,10 +48,8 @@ def toggle_follow():
 def create_context_menu(event) -> Menu:
     menu = Menu(root, tearoff=0)
     
-    if pet_is_following:
-        menu.add_command(label="Stop Following", command=toggle_follow)
-    else:
-        menu.add_command(label="Start Following", command=toggle_follow)
+    menu.add_command(label="Stop Following" if pet_is_following else "Start Following", command=toggle_follow)
+    menu.add_command(label="Quit", command=root.destroy)
 
     try:
         menu.tk_popup(event.x_root, event.y_root)
@@ -66,6 +64,8 @@ panel.bind("<Button-3>", create_context_menu)
 ticks = 0
 last_state = "awake"
 ticks_awake = 0
+
+sleep_timer = (10 * 10)
 
 def move_to(x: float, y: float):
     root.geometry(f"{pet_width}x{pet_height}+{int(x)}+{int(y)}")
@@ -139,9 +139,18 @@ def tick():
     if horizontal_direction == "none" and vertical_direction == "none":
         if last_state == "awake":
             ticks_awake += 1
-        last_state = "awake"
+        
+        if ticks_awake > sleep_timer - 10:
+            sprite = images["yawn"][(0 if (ticks_awake - 1) % 10 > 4 else 1)]
+
+        if ticks_awake >= sleep_timer:
+            last_state = "sleep"
+            sprite = images["sleep"][0 if ticks % 8 > 3 else 1]
+        else:
+            last_state = "awake"
     else:
         last_state = "moving"
+        ticks_awake = 0
 
     panel.configure(image=sprite)
 
